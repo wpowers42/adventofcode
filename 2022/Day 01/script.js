@@ -1,13 +1,13 @@
-fs = require('fs')
+fs = require('fs');
 
 fs.readFile('2022/Day 01/input.txt', 'utf8', function (err,data) {
   if (err) {
     return console.log(err);
   }
-  part1(data);
+  solve(data);
 });
 
-const part1 = (input) => {
+const solve = (input) => {
     let totals = [];
     let currentTotal = 0;
 

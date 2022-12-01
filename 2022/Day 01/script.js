@@ -1,6 +1,5 @@
+const fs = require('fs');
 const path = require('path');
-
-const { readFile } = require('../../utils');
 
 const solve = (input) => {
     let totals = [];
@@ -19,5 +18,6 @@ const solve = (input) => {
     console.log(`Part 2: ${totals.slice(0, 3).reduce((acc, val) => acc + val)}`);
 }
 
-const filePath = path.join(__dirname, "./input.txt")
-readFile(filePath, solve);
+const filePath = path.join(__dirname, "./input.txt");
+const data = fs.readFileSync(filePath, 'utf-8');
+solve(data);

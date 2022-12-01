@@ -1,11 +1,6 @@
-fs = require('fs');
+const path = require('path');
 
-fs.readFile('2022/Day 01/input.txt', 'utf8', function (err,data) {
-  if (err) {
-    return console.log(err);
-  }
-  solve(data);
-});
+const { readFile } = require('../../utils');
 
 const solve = (input) => {
     let totals = [];
@@ -19,7 +14,10 @@ const solve = (input) => {
             currentTotal += parseInt(item);
         }
     });;
-    totals.sort((a,b) => b - a);
-    console.log(`Part 1: ${totals.slice(0,1)}`);
-    console.log(`Part 2: ${totals.slice(0,3).reduce((acc, val) => acc + val)}`);
+    totals.sort((a, b) => b - a);
+    console.log(`Part 1: ${totals.slice(0, 1)}`);
+    console.log(`Part 2: ${totals.slice(0, 3).reduce((acc, val) => acc + val)}`);
 }
+
+const filePath = path.join(__dirname, "./input.txt")
+readFile(filePath, solve);

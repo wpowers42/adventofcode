@@ -4,9 +4,9 @@ const path = require('path');
 
 const convertLetterToNumber = letter => {
     if (letter !== letter.toLowerCase()) {
-        return letter.charCodeAt(0) - 38;
+        return letter.charCodeAt(0) - 'A'.charCodeAt() + 27;
     } else {
-        return letter.charCodeAt(0) - 96;
+        return letter.charCodeAt(0) - 'a'.charCodeAt() + 1;
     }
 }
 

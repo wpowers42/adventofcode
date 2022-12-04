@@ -4,7 +4,7 @@ const path = require('path');
 const isContainedPair = pair => {
     /* 
     A Pair is contained if one of the ranges fully resides within the other.
-    Range A is contained in Range B if Min(A) >= Min(B) && Max(B) <= Max(B)
+    Range A is contained in Range B if Min(A) >= Min(B) && Max(A) <= Max(B)
     */
     let [A, B] = (pair.split(',').map(range => range.split('-')
                                  .map(section => parseInt(section))));

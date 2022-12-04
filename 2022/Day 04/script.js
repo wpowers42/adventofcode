@@ -13,7 +13,7 @@ const isContainedPair = pair => {
 }
 
 const isOverlappedPair = pair => {
-    /* AABB collision detection, but can skip y-axis */
+    /* AABB collision detection, but can skip y-axis since they are equal */
     let [A, B] = (pair.split(',').map(range => range.split('-')
                                  .map(section => parseInt(section))));
     return !(A[1] < B[0] || A[0] > B[1]);

@@ -24,18 +24,8 @@ class Knot {
         let dx = this.referenceKnot.position.x - this.position.x;
         let dy = this.referenceKnot.position.y - this.position.y;
         if (!(Math.abs(dx) <= 1 && Math.abs(dy) <= 1)) {
-            if (dx === 0) {
-                // are in same column, move one step towards referenceKnot along y axis
-                this.position.y += dy > 0 ? 1 : -1;
-            } else if (dy === 0) {
-                // are in same row, move one step towards referenceKnot along x axis
-                this.position.x += dx > 0 ? 1 : -1;
-            } else {
-                // are not in same row or column, move one step towards referenceKnot
-                // along x and y axis;
-                this.position.y += dy > 0 ? 1 : -1;
-                this.position.x += dx > 0 ? 1 : -1;
-            }
+            this.position.y += dy > 0 ? 1 : dy < 0 ? -1 : 0;
+            this.position.x += dx > 0 ? 1 : dx < 0 ? -1 : 0;
         }
         this.locations.add(`${this.position.x}_${this.position.y}`);
     }

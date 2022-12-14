@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const parsePacket = (packet) => {
-    return eval(packet);
+    return JSON.parse(packet);
 }
 
 const comparePackets = (left, right) => {

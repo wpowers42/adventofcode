@@ -6,7 +6,6 @@ const mod = (n, m) => ((n % m) + m) % m;
 const move = (list, index, move) => {
     const element = list.splice(index, 1)[0];
     let newIndex = mod(index + move, list.length);
-    if (move < 0 && newIndex === 0) newIndex = list.length;
     list.splice(newIndex, 0, element);
 }
 

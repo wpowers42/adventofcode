@@ -35,7 +35,7 @@ def handle_number(number, gears):
     y1 = number[0][1]
 
     is_part = False
-    neighbor_gears = set()
+    neighbor_gears = []
 
     # check left and right columns for non digit
     for x in [x1 - 1, x2 + 1]:
@@ -45,7 +45,7 @@ def handle_number(number, gears):
                 is_part = True
 
                 if is_gear:
-                    neighbor_gears.add((x, y))
+                    neighbor_gears.append((x, y))
 
     # check top and bottom rows for non digit
     for x in range(x1, x2 + 1):
@@ -55,7 +55,7 @@ def handle_number(number, gears):
                 is_part = True
 
                 if is_gear:
-                    neighbor_gears.add((x, y))
+                    neighbor_gears.append((x, y))
 
     if is_part:
         value = int("".join([n[2] for n in number]))

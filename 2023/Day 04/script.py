@@ -21,14 +21,12 @@ def solution(input, part):
     if part == 1:
         return sum([2 ** (result[1] - 1) for result in results if result[1] > 0])
 
-    queue = results.copy()
     scratchcards = 0
-    while len(queue) > scratchcards:
-        index, value = queue[scratchcards]
+    while len(results) > scratchcards:
+        index, value = results[scratchcards]
         scratchcards += 1
-        if value > 0:
-            for n in range(value):
-                queue.append(results[index + n + 1])
+        for n in range(value):
+            results.append(results[index + n + 1])
     return scratchcards
 
 

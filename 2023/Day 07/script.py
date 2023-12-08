@@ -11,7 +11,7 @@ KTJJT 220
 QQQJA 483"""
 
 
-def hand_type(hand):
+def hand_score(hand):
     freqs = Counter(hand).most_common(5)
 
     if freqs[0][1] == 5:
@@ -40,14 +40,14 @@ def solve(input, part):
 
     for line in input.split("\n"):
         hand, bid = line.split(" ")
-        type = hand_type(hand)
+        score = hand_score(hand)
 
         if part == 2 and "J" in hand:
             base_hand = hand.replace("J", "")
             for comb in combinations_with_replacement(card_rank, 5 - len(base_hand)):
-                type = max(type, hand_type(base_hand + "".join(comb)))
+                score = max(score, hand_score(base_hand + "".join(comb)))
 
-        hands.append([type, [card_rank.index(card) for card in hand], bid])
+        hands.append([score, [card_rank.index(card) for card in hand], bid])
 
     hands.sort(key=lambda x: (x[0], x[1]), reverse=False)
     return sum([(index + 1) * int(hand[2]) for index, hand in enumerate(hands)])

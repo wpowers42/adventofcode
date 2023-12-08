@@ -18,7 +18,7 @@ def solve(races):
             if calculate_distance(start_ms, end_ms) > record:
                 start_index = start_ms
                 break
-        for start_ms in range(end_ms, 0, -1):
+        for start_ms in range(end_ms, start_index, -1):
             if calculate_distance(start_ms, end_ms) > record:
                 end_index = start_ms
                 break

@@ -20,13 +20,7 @@ with open(os.path.join(dir, "./input.txt"), "r") as f:
 
 def parse_input(input):
     instructions, network = input.split("\n\n")
-    network = {
-        node.split(" = ")[0]: node.split(" = ")[1] for node in network.split("\n")
-    }
-    for key in network:
-        L, R = [re.search("[A-Z0-9]{3}", side) for side in network[key].split(", ")]
-        network[key] = {"L": L.group(0), "R": R.group(0)}
-
+    network = {n[0:3]: {"L": n[7:10], "R": n[12:15]} for n in network.split("\n")}
     return instructions, network
 
 

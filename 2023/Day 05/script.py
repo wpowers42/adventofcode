@@ -45,7 +45,7 @@ seeds, maps = almanac[0], almanac[1:]
 seeds = [int(seed) for seed in seeds[0].split(": ")[1].split(" ")]
 
 
-def solve(maps, seeds):
+def part_1(maps, seeds):
     locations = []
     for seed in seeds:
         for map in maps:
@@ -125,5 +125,5 @@ def part_2(maps, seeds):
     return min(pairs)[0]
 
 
-print("Part 1: ", solve(maps, seeds))
+print("Part 1: ", part_1(maps, seeds))
 print("Part 2: ", part_2(maps, seeds))

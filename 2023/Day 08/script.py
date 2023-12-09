@@ -35,10 +35,7 @@ def part_1(instructions, network):
     step = 0
     while node != "ZZZ":
         instruction = instructions[step % len(instructions)]
-        if instruction == "R":
-            node = network[node]["R"]
-        elif instruction == "L":
-            node = network[node]["L"]
+        node = network[node][instruction]
         step += 1
     return step
 
@@ -50,10 +47,7 @@ def part_2(instructions, network):
     for index, node in enumerate(nodes):
         while node[-1] != "Z":
             instruction = instructions[step % len(instructions)]
-            if instruction == "R":
-                node = network[node]["R"]
-            elif instruction == "L":
-                node = network[node]["L"]
+            node = network[node][instruction]
             step += 1
         nodes[index] = step
         step = 0

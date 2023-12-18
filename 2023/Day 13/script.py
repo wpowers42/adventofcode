@@ -48,9 +48,10 @@ def find_symmetry(pattern, tolerance):
         return _find_symmetry(pattern)
     else:
         # rotate the pattern 270 degrees to compare across rows
-        pattern = ["".join(row) for row in list(zip(*pattern[::-1]))]
-        pattern = ["".join(row) for row in list(zip(*pattern[::-1]))]
-        pattern = ["".join(row) for row in list(zip(*pattern[::-1]))]
+        pattern = ["".join(row) for row in zip(*pattern[::-1])]
+        pattern = ["".join(row) for row in zip(*pattern[::-1])]
+        pattern = ["".join(row) for row in zip(*pattern[::-1])]
+
         return _find_symmetry(pattern) * 100
 
 

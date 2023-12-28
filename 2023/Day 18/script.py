@@ -29,10 +29,12 @@ def main():
 
     # Part 2
     boundary = list()
+    perimeter = 0
     x, y = (0, 0)
     for step in plan.split("\n"):
         _, _, color = step.split(" ")
         meters = int(color[2:7], 16)
+        perimeter += meters
         direction = list(dirs.values())[int(color[7])]
 
         x += direction[0] * meters
@@ -47,7 +49,22 @@ def main():
     # I have no idea why the extra math on length() is needed. I derived it
     # by trial and error. I thought simply area() OR area() + length()
     # would be enough.
-    print("Part 2:", area(polygon) + length(polygon) / 2 + 1)
+    print("Part 2 (shapely):", area(polygon) + length(polygon) / 2 + 1)
+
+    print("Part 2 (shoelace):", shoelace(boundary) + perimeter / 2 + 1)
+
+
+def shoelace(boundary):
+    area = 0
+    for i in range(len(boundary)):
+        x1, y1 = boundary[i]
+        x2, y2 = boundary[(i + 1) % len(boundary)]
+        area += x1 * y2 - x2 * y1
+
+        # Interestingly, I initially had this typo that was giving the
+        # correct result without need to divide by 2:
+        # area += x1 * y2 - x2 * y2
+    return area / 2
 
 
 def flood_fill(node, boundary):

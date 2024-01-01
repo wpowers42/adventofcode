@@ -22,31 +22,35 @@ def create_brick(position):
     return brick
 
 
+def is_on_bottom(brick):
+    return min(brick, key=lambda b: b[2])[2] == 1
+
+
 def main(snapshot):
     bricks = []
     for position in snapshot.split("\n"):
         bricks.append(create_brick(position))
     voxels = {cube for brick in bricks for cube in brick}
-    falling = True
-    while falling:
-        # sort bricks from lowest to highest
-        bricks.sort(key=lambda b: min(c[2] for c in b))
-        falling = False
-        for ix, brick in enumerate(bricks):
-            if min(brick, key=lambda b: b[2])[2] == 1:
-                # Skip, brick already at bottom
-                continue
-            voxels = voxels.difference(brick)
-            new_brick = {(x, y, z - 1) for (x, y, z) in brick}
 
-            if len(voxels.intersection(new_brick)) == 0:
-                # Add new brick
-                falling = True
-                bricks[ix] = new_brick
-                voxels = voxels.union(new_brick)
-            else:
-                # Add original back
-                voxels = voxels.union(brick)
+    # sort bricks from lowest to highest
+    bricks.sort(key=lambda b: min(c[2] for c in b))
+
+    # settle all bricks
+    for ix, brick in enumerate(bricks):
+        voxels = voxels.difference(brick)
+
+        # find highest point brick will touch
+        max_z = 1  # on floor
+        for x, y, z in brick:
+            while (x, y, z - 1) not in voxels and z > 1:
+                z = z - 1
+            max_z = max(max_z, z)
+
+        delta = min(brick, key=lambda b: b[2])[2] - max_z
+
+        bricks[ix] = {(x, y, z - delta) for (x, y, z) in brick}
+        voxels = voxels.union(bricks[ix])
+
     support_structure = {i: set() for i in range(len(bricks))}
     for ix, brick in enumerate(bricks):
         new_brick = {(x, y, z - 1) for (x, y, z) in brick}

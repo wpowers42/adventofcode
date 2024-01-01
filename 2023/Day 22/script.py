@@ -1,4 +1,5 @@
 from copy import deepcopy
+from collections import deque
 
 with open("input.txt") as f:
     input = f.read()
@@ -22,10 +23,6 @@ def create_brick(position):
     return brick
 
 
-def is_on_bottom(brick):
-    return min(brick, key=lambda b: b[2])[2] == 1
-
-
 def main(snapshot):
     bricks = []
     for position in snapshot.split("\n"):
@@ -37,9 +34,11 @@ def main(snapshot):
 
     # settle all bricks
     for ix, brick in enumerate(bricks):
+        # remove brick from voxels
         voxels = voxels.difference(brick)
 
-        # find highest point brick will touch
+        # find highest point brick can rest without colliding
+        # into other bricks or floor
         max_z = 1  # on floor
         for x, y, z in brick:
             while (x, y, z - 1) not in voxels and z > 1:
@@ -47,8 +46,9 @@ def main(snapshot):
             max_z = max(max_z, z)
 
         delta = min(brick, key=lambda b: b[2])[2] - max_z
-
         bricks[ix] = {(x, y, z - delta) for (x, y, z) in brick}
+
+        # add original or updated position
         voxels = voxels.union(bricks[ix])
 
     support_structure = {i: set() for i in range(len(bricks))}
@@ -59,37 +59,32 @@ def main(snapshot):
                 continue
             elif len(new_brick.intersection(other_brick)) > 0:
                 support_structure[ix].add(other_ix)
+
     # start with all keys. remove those that show up as single support
-    results = {i for i in range(len(bricks))}
+    result = {i for i in range(len(bricks))}
 
-    for k, v in support_structure.items():
-        if len(v) == 1:
-            results = results - v
+    for supporting_bricks in support_structure.values():
+        if len(supporting_bricks) == 1:
+            result -= supporting_bricks
 
-    print(f"Part 1: {len(results)}")
+    print(f"Part 1: {len(result)}")
 
-    results = {i: 0 for i in range(len(bricks))}
-    r = []
-    for i in results:
-        queue = [i]
-        ss = deepcopy(support_structure)
-        num_f = 0
+    result = 0
+    for i in range(len(bricks)):
+        queue = deque([i])
+        dependencies = deepcopy(support_structure)
         while queue:
-            node = queue.pop(0)
-            # eliminate from ss keys
-            # remove from ss values
-            # if no ss value is 0, add to queue
-            del ss[node]
-            for k, v in ss.items():
-                if node in v:
-                    ss[k].remove(node)
-                    if len(ss[k]) == 0:
-                        queue.append(k)
-                        num_f += 1
+            brick = queue.popleft()
+            for other_brick, supporting_bricks in dependencies.items():
+                if brick in supporting_bricks:
+                    # remove from values
+                    dependencies[other_brick].remove(brick)
+                    if len(dependencies[other_brick]) == 0:
+                        # brick was only supporting brick
+                        queue.append(other_brick)
+                        result += 1
 
-        r.append(num_f)
-
-    print(f"Part 2: {sum(r)}")
+    print(f"Part 2: {result}")
 
 
 if __name__ == "__main__":

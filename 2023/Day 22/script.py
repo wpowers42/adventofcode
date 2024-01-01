@@ -51,7 +51,7 @@ def main(snapshot):
         # add original or updated position
         voxels = voxels.union(bricks[ix])
 
-    support_structure = {i: set() for i in range(len(bricks))}
+    support_structure = {i: set() for i, _ in enumerate(bricks)}
     for ix, brick in enumerate(bricks):
         new_brick = {(x, y, z - 1) for (x, y, z) in brick}
         for other_ix, other_brick in enumerate(bricks):
@@ -61,7 +61,7 @@ def main(snapshot):
                 support_structure[ix].add(other_ix)
 
     # start with all keys. remove those that show up as single support
-    result = {i for i in range(len(bricks))}
+    result = {i for i, _ in enumerate(bricks)}
 
     for supporting_bricks in support_structure.values():
         if len(supporting_bricks) == 1:
@@ -70,7 +70,7 @@ def main(snapshot):
     print(f"Part 1: {len(result)}")
 
     result = 0
-    for i in range(len(bricks)):
+    for i, _ in enumerate(bricks):
         queue = deque([i])
         dependencies = deepcopy(support_structure)
         while queue:

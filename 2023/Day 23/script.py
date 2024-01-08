@@ -67,13 +67,14 @@ def main(trails, part=1):
         print(f"Part {part}: {max((len(solution) for solution in solutions)) - 1}")
         return
 
+    # frontier will be the nodes that fork
     frontier = deque([start])
     visited = set()
-    graph = {(end, None): 0}
+    graph = {}
     forks = set(start)
 
     while frontier:
-        x, y = frontier.popleft()  # we know this is start or forks
+        x, y = frontier.popleft()
         visited.add((x, y))
         for neighbor in list(tiles[(x, y)]["neighbors"].difference(visited)):
             distance = 0
@@ -94,14 +95,15 @@ def main(trails, part=1):
                 elif len(neighbors) == 1:
                     queue.append(neighbors.pop())
                 else:
+                    # check if we looped back around and hit a node we already visited
                     for neighbor in tiles[node]["neighbors"]:
                         if neighbor in forks:
                             graph[(x, y), neighbor] = distance + 1
 
+    # Actually find the longest path using simplified graph
     graph = build_graph(graph.items())
     all_paths = find_all_paths(graph, start, end)
     longest_path = max(all_paths, key=lambda x: x[1], default=(None, 0))
-
     print(f"Part 2: {longest_path[1]}")
 
 
@@ -113,25 +115,27 @@ def build_graph(pairs):
     return graph
 
 
-def find_all_paths(graph, start, end, path=[], total_distance=0):
-    path = path + [start]
+def find_all_paths(graph, start, end, path=None, total_distance=0):
+    if path is None:
+        path = set()
+
+    path.add(start)
     if start == end:
         return [(path, total_distance)]
-    if start not in graph:
-        return []
 
     paths = []
+
     for node, distance in graph[start]:
         if node not in path:  # Prevent revisiting the same node
-            newpaths = find_all_paths(graph, node, end, path, total_distance + distance)
+            newpaths = find_all_paths(
+                graph, node, end, path.copy(), total_distance + distance
+            )
             for newpath in newpaths:
                 paths.append(newpath)
+
     return paths
 
 
-import cProfile
-
 if __name__ == "__main__":
-    # cProfile.run("main(input)")
     main(input)
     main(input, 2)

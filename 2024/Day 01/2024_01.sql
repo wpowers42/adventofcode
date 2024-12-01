@@ -4,7 +4,7 @@ create temp table input as
         with
             input as (
                 select *
-                from read_csv('./2024/Day 01/input.csv',
+                from read_csv('./2024/Day 01/input.txt',
                               header = false,
                               columns = {'line':'varchar'})
             )

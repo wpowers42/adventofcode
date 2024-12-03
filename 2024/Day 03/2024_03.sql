@@ -31,8 +31,7 @@ from tall;
 /* Part 2 */
 with
     enabled as (
-        select
-            regexp_replace(line, '(don''t\(\).*?do\(\))', '', 'g') as line
+        select regexp_replace(line, '(don''t\(\).*?do\(\))', '', 'g') as line
         from input
     )
 

@@ -40,29 +40,29 @@ create temp table dirs as
     );
 
 with
-    cte as (
+    char1 as (
         select *
         from input
         where char = 'X'
     )
   , joined as (
         select
-            cte.x
-          , cte.y
+            char1.x
+          , char1.y
           , count(1) as dirs
-        from cte
+        from char1
         cross join dirs
         join input as char2
-            on cte.x + dirs.x = char2.x
-            and cte.y + dirs.y = char2.y
+            on char1.x + dirs.x = char2.x
+            and char1.y + dirs.y = char2.y
             and char2.char = 'M'
         join input as char3
-            on cte.x + 2 * dirs.x = char3.x
-            and cte.y + 2 * dirs.y = char3.y
+            on char2.x + dirs.x = char3.x
+            and char2.y + dirs.y = char3.y
             and char3.char = 'A'
         join input as char4
-            on cte.x + 3 * dirs.x = char4.x
-            and cte.y + 3 * dirs.y = char4.y
+            on char3.x + dirs.x = char4.x
+            and char3.y + dirs.y = char4.y
             and char4.char = 'S'
         group by 1, 2
     )
@@ -85,7 +85,7 @@ create temp table xdirs as
     );
 
 with
-    cte as (
+    char1 as (
         select *
         from input
         where char = 'M'
@@ -95,15 +95,15 @@ with
             char2.x
           , char2.y
           , count(1) as num_mas
-        from cte
+        from char1
         cross join xdirs
         join input as char2
-            on cte.x + xdirs.x = char2.x
-            and cte.y + xdirs.y = char2.y
+            on char1.x + xdirs.x = char2.x
+            and char1.y + xdirs.y = char2.y
             and char2.char = 'A'
         join input as char3
-            on cte.x + 2 * xdirs.x = char3.x
-            and cte.y + 2 * xdirs.y = char3.y
+            on char2.x + xdirs.x = char3.x
+            and char2.y + xdirs.y = char3.y
             and char3.char = 'S'
         group by 1, 2
     )

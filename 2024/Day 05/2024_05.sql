@@ -103,8 +103,8 @@ create temp table update_rules as
           , count(1) as after_count
         from rules
         join updates
-            on rules.before :: varchar = any (updates.update_list)
-            and rules.after :: varchar = any (updates.update_list)
+            on rules.before :: varchar = any(updates.update_list)
+            and rules.after :: varchar = any(updates.update_list)
         group by 1, 2
     )
 ;

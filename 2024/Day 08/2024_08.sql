@@ -63,10 +63,8 @@ with
           , dx
           , dy
         from harmonics
-        where x + dx between 1
-            and getvariable('max_x')
-          and y + dy between 1
-            and getvariable('max_y')
+        where x + dx between 1 and getvariable('max_x')
+          and y + dy between 1 and getvariable('max_y')
     )
 
 select count(distinct x || ',' || y) as result

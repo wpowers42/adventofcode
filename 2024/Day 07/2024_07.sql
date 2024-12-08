@@ -23,7 +23,6 @@ create temp table input as
 
     );
 
-
 /* Part 1 */
 with
     recursive
@@ -43,7 +42,10 @@ with
             select
                 equations.equation_id
               , equations.result
-              , equations.value * input.value
+              , case op
+                when 'x' then equations.value * input.value
+                when '+' then equations.value + input.value
+                end
               , input.value_index
               , equations.value_count
               , equations.equation_depth + 1 as equation_depth
@@ -51,20 +53,7 @@ with
             join input
                 on equations.equation_id = input.equation_id
                 and equations.value_index = input.value_index - 1
-
-            union all
-
-            select
-                equations.equation_id
-              , equations.result
-              , equations.value + input.value
-              , input.value_index
-              , equations.value_count
-              , equations.equation_depth + 1 as equation_depth
-            from equations
-            join input
-                on equations.equation_id = input.equation_id
-                and equations.value_index = input.value_index - 1
+                cross join (select unnest(['x', '+']) as op)
         )
     )
 select sum(max("value")) over () as result
@@ -94,7 +83,11 @@ with
             select
                 equations.equation_id
               , equations.result
-              , equations.value * input.value
+                            , case op
+                when 'x' then equations.value * input.value
+                when '+' then equations.value + input.value
+                when '|' then (equations.value || input.value) :: bigint
+                end
               , input.value_index
               , equations.value_count
               , equations.equation_depth + 1 as equation_depth
@@ -102,34 +95,8 @@ with
             join input
                 on equations.equation_id = input.equation_id
                 and equations.value_index = input.value_index - 1
+                cross join (select unnest(['x', '+', '|']) as op)
 
-            union all
-
-            select
-                equations.equation_id
-              , equations.result
-              , equations.value + input.value
-              , input.value_index
-              , equations.value_count
-              , equations.equation_depth + 1 as equation_depth
-            from equations
-            join input
-                on equations.equation_id = input.equation_id
-                and equations.value_index = input.value_index - 1
-
-            union all
-
-            select
-                equations.equation_id
-              , equations.result
-              , (equations.value || input.value) :: bigint
-              , input.value_index
-              , equations.value_count
-              , equations.equation_depth + 1 as equation_depth
-            from equations
-            join input
-                on equations.equation_id = input.equation_id
-                and equations.value_index = input.value_index - 1
         )
     )
 select sum(max("value")) over () as result

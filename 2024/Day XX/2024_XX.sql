@@ -11,7 +11,7 @@ with
         select
             row_number() over ()            as y
           , regexp_split_to_array(line, '') as line
-        from read_csv('./2024/Day 09/test.txt',
+        from read_csv('./2024/Day XX/test.txt',
                       header = false,
                       columns = {'line':'varchar'})
     )

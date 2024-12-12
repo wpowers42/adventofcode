@@ -20,6 +20,9 @@ create temp table input as
     );
 
 /* Part 1 & 2 */
+
+create macro zero_trim(x) as (coalesce(nullif(ltrim(x, '0'), ''), '0'));
+
 with
     recursive
     line as (
@@ -44,21 +47,12 @@ with
                 )
 
             select
-                case
-                    when n = '0' then '1'
-                    when len(n) % 2 = 0 then coalesce(nullif(ltrim(n[1:len(n) / 2], '0'), ''), '0')
-                    else (n :: bigint * 2024) :: varchar
-                end
-              , copies
-              , depth + 1
-            from cte
-
-            union all
-
-            select
-                case
-                    when len(n) % 2 = 0 then coalesce(nullif(ltrim(n[len(n) / 2 + 1:], '0'), ''), '0')
-                end
+                unnest(
+                        case
+                            when n = '0' then ['1']
+                            when len(n) % 2 = 0 then [zero_trim(n[1:len(n) / 2]), zero_trim(n[len(n) / 2 + 1:])]
+                            else [(n :: bigint * 2024) :: varchar]
+                        end)
               , copies
               , depth + 1
             from cte

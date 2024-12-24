@@ -18,6 +18,7 @@ create temp table input as
           , unnest(line)                        as cell
         from cte
     );
+;
 
 drop table if exists endpoints;
 create temp table endpoints as
@@ -26,10 +27,6 @@ create temp table endpoints as
         from input
         where cell in ('S', 'E')
     );
-
-update input
-set cell = '.'
-where cell in ('S', 'E');
 
 drop table if exists dirs;
 create temp table dirs as
@@ -77,18 +74,14 @@ create temp table turns as
     );
 
 
-set variable target_xy = (
-    select x || '|' || y
-    from endpoints
-    where cell = 'E'
-    );
-
-
 /* Parts 1 + 2 */
 
 
-drop type node;
-create type node as struct(x integer, y integer, points integer, dx integer, dy integer);
+drop
+type node;
+create
+type node as struct(x integer, y integer, points integer, dx integer, dy integer);
+
 
 with
     recursive
@@ -97,13 +90,12 @@ with
         select
             x
           , y
-          , 1            as dx
-          , 0            as dy
-          , 0            as points
-          , 0            as depth
-          , [] :: node[] as visited
-          , false        as reached_end
-          , false        as has_cheaper_path
+          , 1                                as dx
+          , 0                                as dy
+          , 0                                as points
+          , [(x, y, points, dx, dy) :: node] as visited
+          , false                            as reached_end
+          , true                             as is_cheapest
         from endpoints
         where cell = 'S'
 
@@ -119,9 +111,8 @@ with
                       , turns.dx2                                                                                             as dx
                       , turns.dy2                                                                                             as dy
                       , bfs.points + turns.points                                                                             as points
-                      , bfs.depth + 1                                                                                         as depth
                       , list_append(bfs.visited, (input.x, input.y, bfs.points + turns.points, turns.dx2, turns.dy2) :: node) as visited
-                      , (input.x || '|' || input.y = getvariable('target_xy')) :: int                                         as reached_end
+                      , (input.cell = 'E') :: int                                                                             as reached_end
                     from bfs
                     join turns
                         on bfs.dx = turns.dx1
@@ -129,61 +120,71 @@ with
                     join input
                         on bfs.x + turns.dx2 = input.x
                         and bfs.y + turns.dy2 = input.y
-                        and input.cell = '.'
+                        and input.cell in ('.', 'E')
                     where reached_end is false
-                      and has_cheaper_path is false
-                    qualify dense_rank() over (order by bfs.points) = 1
+                      and is_cheapest is true
 
                     union all
 
                     select
-                        bfs.x
-                      , bfs.y
-                      , bfs.dx
-                      , bfs.dy
-                      , bfs.points
-                      , bfs.depth + 1
-                      , bfs.visited
+                        x
+                      , y
+                      , dx
+                      , dy
+                      , points
+                      , visited
                       , reached_end
                     from bfs
                     where reached_end is false
-                      and has_cheaper_path is false
-                    qualify dense_rank() over (order by bfs.points) > 1
-                        and rank() over (partition by bfs.x, bfs.y, bfs.dx, bfs.dy order by bfs.points) = 1
+                      and is_cheapest is false
+                    qualify rank() over (partition by x, y, dx, dy order by points) = 1
+                )
+              , unnested as (
+                    select unnest(visited) as cell
+                    from unioned
                 )
 
             select
-                a.x
-              , a.y
-              , a.dx
-              , a.dy
-              , a.points
-              , a.depth
-              , a.visited
-              , max(max(a.reached_end)) over () :: boolean as reached_end
-              , bool_or(b.visited is not null)             as has_cheaper_path
-            from unioned as a
-            left join unioned as b
-                on len(list_filter(b.visited, visited -> a.x = visited.x and a.y = visited.y and a.points > visited.points and a.dx = visited.dx and a.dy = visited.dy)) > 0 /* ???s */
-                -- on len(list_filter(b.visited, visited -> a.x = visited.x and a.y = visited.y and a.points > visited.points)) > 0 /* 43s for part 1 */
-            group by 1, 2, 3, 4, 5, 6, 7
+                x
+              , y
+              , dx
+              , dy
+              , points
+              , visited
+              , max(reached_end) over () :: boolean     as reached_end
+              , dense_rank() over (order by points) = 1 as is_cheapest
+            from unioned
+            where not exists
+                      (
+                          select 1
+                          from unnested
+                          where cell.x = unioned.x
+                            and cell.y = unioned.y
+                            and cell.points < unioned.points
+                              /* dx and dy needed for Part 2 and increase execution time from 30 sec --> 12 min */
+                            and cell.dx = unioned.dx
+                            and cell.dy = unioned.dy
+                      )
         )
     )
 
-    -- 75416
   , best_paths as (
         select
             points
           , unnest(visited) as nodes
         from bfs
+        join endpoints
+            on bfs.x = endpoints.x
+            and bfs.y = endpoints.y
+            and endpoints.cell = 'E'
         where reached_end
+        qualify dense_rank() over (order by points) = 1
     )
 
 select
-    points                as result_part1
-  , count(distinct nodes) as result_part2
+    points                                    as result_part1
+  , count(distinct nodes.x || '|' || nodes.y) as result_part2
 from best_paths
 group by 1
 order by 1
-limit 1
 ;

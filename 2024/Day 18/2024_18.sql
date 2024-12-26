@@ -1,8 +1,25 @@
 /* DuckDB */
 
-set variable size = 71; /* Test: 7, Input: 71 */
-set variable num_bytes = 1024; /* Test: 14, Input: 1024 */
+set variable size = 71;
+/* Part 1: 1024, Part 2: Binary Search */
+set variable num_bytes = 3035;
 
+/*
+Part 2 - Solved using manual binary search on num_bytes for earliest failure
+(1024 + 3450) / 2 = 2242
+2242 Y
+2846 Y
+3148 N
+2997 Y
+3073 N
+3035 N
+3016 Y
+3026 Y
+3031 Y
+3033 Y
+3034 Y
+3035 N <<<
+*/
 
 drop table if exists input;
 create temp table input as
@@ -63,7 +80,7 @@ with
           , 0                                                         as steps
           , false                                                     as is_solved
           , getvariable('size') - 1 - x + getvariable('size') - 1 - y as est_cost
-          , 1                                                         as cost_rank
+          , true                                                      as is_cheapest
         from input
         where cell = 'S'
 
@@ -90,14 +107,14 @@ with
                         and input.cell in ('.', 'E')
                         and not list_contains(bfs.path, input.key)
                     where bfs.is_solved is false
-                      and bfs.cost_rank = 1
+                      and bfs.is_cheapest is true
 
                     union all
 
                     select bfs.*
                     from bfs
-                    where bfs.is_solved is false
-                      and cost_rank > 1
+                    where is_solved is false
+                      and is_cheapest is false
                 )
               , unnested as (
                     select
@@ -121,17 +138,10 @@ with
               , cell
               , key
               , path
-              , steps + 1 as steps
-              , (
-                    select max((cell = 'E') :: int)
-                    from unioned a
-                )         as is_solved
+              , steps + 1                                 as steps
+              , bool_or(cell = 'E') over () :: int        as is_solved
               , est_cost
-              , (
-                    select count(1)
-                    from unioned a
-                    where a.est_cost < unioned.est_cost
-                ) + 1     as cost_rank
+              , dense_rank() over (order by est_cost) = 1 as is_cheapest
             from unioned
             where not exists
                       (
@@ -145,14 +155,19 @@ with
         )
     )
 
-select *
-     , len(path)
+select est_cost as result
 from bfs
--- where is_solved
-order by steps desc, est_cost;
-and cell = 'E';
-
--- 282 15s
+where is_solved
+  and cell = 'E';
 
 
 /* Part 2 */
+
+select
+    row_number() over ()     as byte_id
+  , split_part(line, ',', 1) as x
+  , split_part(line, ',', 2) as y
+from read_csv('./2024/Day 18/input.txt',
+              header = false,
+              columns = {'line':'varchar'})
+qualify byte_id = getvariable('num_bytes');

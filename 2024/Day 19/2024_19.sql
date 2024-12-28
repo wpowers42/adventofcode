@@ -28,17 +28,16 @@ create temp table designs as
         from cte
     );
 
-/* Part 1 */
 
+/* Parts 1 + 2 */
 with
     recursive
     matches as (
         /* Base case */
         select
-            designs.design    as original_design
-          , designs.design    as design
-          , '' :: varchar(64) as patterns
-          , 0                 as depth
+            designs.design as original_design
+          , designs.design as design
+          , 1 :: int64     as num_patterns
         from designs
 
         /* Recursive case */
@@ -50,25 +49,21 @@ with
                     select
                         matches.original_design                                                                           as original_design
                       , substring(matches.design, len(patterns.pattern) + 1, len(matches.design) - len(patterns.pattern)) as design
-                      , matches.patterns || patterns.pattern                                                              as patterns
-                      , depth + 1                                                                                         as depth
+                        /* Count the cumulative product of the number of patterns */
+                      , matches.num_patterns * count(1)                                                                   as patterns
                     from matches
                     join patterns
-                        -- on matches.design like patterns.pattern || '%'
                         on left(matches.design, len(patterns.pattern)) = patterns.pattern
+                    group by 1, 2, matches.num_patterns
                 )
 
             select *
             from cte
-            qualify row_number() over (partition by original_design, patterns) = 1
         )
-
-
     )
 
-select count(distinct original_design) as result
+select
+    count(distinct original_design) as result_part1
+  , sum(num_patterns)               as result_part2
 from matches
-where original_design = patterns;
-
-
-/* Part 2 */
+where design = '';

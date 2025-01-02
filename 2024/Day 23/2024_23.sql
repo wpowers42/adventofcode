@@ -26,33 +26,7 @@ create temp table input as
         from cte
     );
 
-
-/* Part 1 */
-with
-    cte as (
-        select
-            a.c1
-          , a.c2
-          , c.c2 as c3
-        from input as a
-        join input as b
-            on a.c1 = b.c1
-        join input as c
-            on a.c2 = c.c1
-            and b.c2 = c.c2
-    )
-
-  , deduped as (
-        select distinct
-            list_sort([c1, c2, c3]) as result
-        from cte
-        where c1 like 't%'
-    )
-
-select count(1) as solution
-from deduped;
-
-/* Part 2 */
+/* Parts 1 + 2 */
 
 -- Execution Time: 50s
 with
@@ -90,7 +64,22 @@ with
         )
     )
 
-select distinct array_to_string(nodes, ',') as solution
+
+select
+    'Part 1'     as part
+  , count(nodes) as solution
 from lan
-order by len(nodes) desc
-limit 1;
+where len(list_filter(nodes, x -> x like 't%')) > 0
+  and len(nodes) = 3
+group by 1
+
+union all
+
+(
+    select distinct
+        'Part 2'                    as part
+      , array_to_string(nodes, ',') as solution_part2
+    from lan
+    order by len(nodes) desc
+    limit 1
+);

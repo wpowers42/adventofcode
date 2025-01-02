@@ -27,8 +27,6 @@ create temp table input as
     );
 
 /* Parts 1 + 2 */
-
--- Execution Time: 50s
 with
     recursive
     lan as (
@@ -52,7 +50,7 @@ with
                       , input.c2
                       , count(input.c2) as matches
                     from cte
-                    left join input
+                    join input
                         on cte.node = input.c1
                         and not list_contains(cte.nodes, input.c2)
                     group by 1, 2

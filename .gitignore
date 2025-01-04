@@ -8,3 +8,4 @@ venv
 *.wal
 *.tmp
 input.txt
+test.txt
